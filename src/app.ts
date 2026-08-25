@@ -5,7 +5,7 @@ import type { Config } from './config.js';
 import { createPaymentSchema } from './domain/payment.js';
 import type { PaymentService } from './services/payment-service.js';
 import { verifyHmacSha256 } from './security/webhook-signature.js';
-import { dashboardHtml } from './dashboard.js';
+import { dashboardHtml, dashboardScript } from './dashboard.js';
 
 export function buildApp(config: Config, service: PaymentService) {
   const app = Fastify({ logger: { redact: ['req.headers.authorization', 'req.headers.x-appypay-signature'] } });
@@ -16,6 +16,10 @@ export function buildApp(config: Config, service: PaymentService) {
   app.get('/dashboard', async (_request, reply) => {
     if (config.NODE_ENV === 'production') return reply.code(404).send({ code: 'NOT_FOUND' });
     return reply.type('text/html; charset=utf-8').send(dashboardHtml);
+  });
+  app.get('/dashboard.js', async (_request, reply) => {
+    if (config.NODE_ENV === 'production') return reply.code(404).send({ code: 'NOT_FOUND' });
+    return reply.type('application/javascript; charset=utf-8').send(dashboardScript);
   });
   app.get('/v1/payments', async () => service.listRecent(100));
   app.post('/v1/payments', async (request, reply) => {
