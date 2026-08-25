@@ -1,4 +1,4 @@
-import type { CreatePayment, PaymentResult } from '../domain/payment.js';
+import type { CreatePayment, PaymentResult, PaymentView } from '../domain/payment.js';
 import type { AppyPayProvider, AppyPayWebhookEvent } from '../providers/appypay.js';
 
 export interface PaymentStore {
@@ -6,6 +6,7 @@ export interface PaymentStore {
   saveCreated(input: CreatePayment, result: PaymentResult): Promise<void>;
   recordEvent(event: AppyPayWebhookEvent): Promise<boolean>;
   updateStatus(providerPaymentId: string, status: AppyPayWebhookEvent['status']): Promise<void>;
+  listRecent(limit: number): Promise<PaymentView[]>;
 }
 
 export class PaymentService {
@@ -23,4 +24,5 @@ export class PaymentService {
     if (inserted) await this.store.updateStatus(event.paymentId, event.status);
     return { duplicate: !inserted, event };
   }
+  listRecent(limit = 100): Promise<PaymentView[]> { return this.store.listRecent(limit); }
 }

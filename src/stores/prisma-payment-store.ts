@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient, type Payment as DbPayment } from '@prisma/client';
-import type { CreatePayment, PaymentResult } from '../domain/payment.js';
+import type { CreatePayment, PaymentResult, PaymentView } from '../domain/payment.js';
 import type { AppyPayWebhookEvent } from '../providers/appypay.js';
 import type { PaymentStore } from '../services/payment-service.js';
 
@@ -58,5 +58,19 @@ export class PrismaPaymentStore implements PaymentStore {
 
   async updateStatus(providerPaymentId: string, status: AppyPayWebhookEvent['status']): Promise<void> {
     await this.prisma.payment.update({ where: { appyPayPaymentId: providerPaymentId }, data: { status } });
+  }
+
+  async listRecent(limit: number): Promise<PaymentView[]> {
+    const payments = await this.prisma.payment.findMany({ take: Math.min(Math.max(limit, 1), 200), orderBy: { createdAt: 'desc' }, include: { merchant: { select: { shopDomain: true } } } });
+    return payments.map(payment => ({
+      ...toResult(payment),
+      id: payment.id,
+      merchant: payment.merchant.shopDomain,
+      shopifySessionId: payment.shopifySessionId,
+      method: payment.method,
+      amountMinor: Number(payment.amountMinor),
+      currency: 'AOA',
+      createdAt: payment.createdAt.toISOString(),
+    }));
   }
 }

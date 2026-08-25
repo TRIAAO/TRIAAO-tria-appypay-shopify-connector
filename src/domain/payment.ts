@@ -24,3 +24,13 @@ export interface PaymentResult {
   reference?: string;
   expiresAt?: string;
 }
+
+export interface PaymentView extends PaymentResult {
+  id: string;
+  merchant: string;
+  shopifySessionId: string;
+  method: PaymentMethod;
+  amountMinor: number;
+  currency: 'AOA';
+  createdAt: string;
+}

@@ -15,4 +15,8 @@ describe('PaymentService', () => {
     const event = {id:'evt-1',paymentId:(await service.create(input)).providerPaymentId,status:'PAID',occurredAt:new Date().toISOString()};
     expect((await service.processWebhook(event)).duplicate).toBe(false); expect((await service.processWebhook(event)).duplicate).toBe(true);
   });
+  it('lists created payments for the dashboard', async () => {
+    const service = new PaymentService(new MockAppyPayProvider(), new InMemoryPaymentStore()); await service.create(input);
+    const rows = await service.listRecent(); expect(rows).toHaveLength(1); expect(rows[0]?.merchant).toBe('spaccio');
+  });
 });
