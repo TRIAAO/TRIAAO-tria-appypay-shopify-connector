@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  MULTICAIXA_EXPRESS
+  REFERENCE
+}
+
+model Merchant {
+  id          String   @id @default(cuid())
+  shopDomain  String   @unique
+  active      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  payments    Payment[]
+}
+
+model Payment {
+  id                 String        @id @default(cuid())
+  merchantId         String
+  merchant           Merchant      @relation(fields: [merchantId], references: [id])
+  shopifySessionId   String
+  appyPayPaymentId   String?       @unique
+  idempotencyKey     String        @unique
+  method             PaymentMethod
+  status             PaymentStatus @default(PENDING)
+  amountMinor        BigInt
+  currency           String        @default("AOA")
+  redirectUrl        String?
+  reference          String?
+  expiresAt          DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  events              PaymentEvent[]
+  @@unique([merchantId, shopifySessionId])
+}
+
+model PaymentEvent {
+  id          String   @id @default(cuid())
+  paymentId   String
+  payment     Payment  @relation(fields: [paymentId], references: [id])
+  providerId  String   @unique
+  eventType   String
+  payload     Json
+  receivedAt  DateTime @default(now())
+}
