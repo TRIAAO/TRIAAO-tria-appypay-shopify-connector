@@ -8,7 +8,7 @@ The connector is split into four boundaries: Shopify Payment Extension, connecto
 - AOA-only transactions.
 - MULTICAIXA Express and Reference domain models.
 - HMAC webhook verification, event deduplication and charge idempotency.
-- PostgreSQL schema prepared; runtime store will migrate from memory before UAT.
+- PostgreSQL is the runtime source of truth and migrations run automatically at container startup.
 
 ## Approval-dependent work
 
