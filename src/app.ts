@@ -31,11 +31,11 @@ export function buildApp(config: Config, service: PaymentService, oauth?: Shopif
     return reply.redirect('/dashboard');
   });
   app.get('/dashboard', async (_request, reply) => {
-    if (config.NODE_ENV === 'production') return reply.code(404).send({ code: 'NOT_FOUND' });
+    if (!config.DASHBOARD_ENABLED) return reply.code(404).send({ code: 'NOT_FOUND' });
     return reply.type('text/html; charset=utf-8').send(dashboardHtml);
   });
   app.get('/dashboard.js', async (_request, reply) => {
-    if (config.NODE_ENV === 'production') return reply.code(404).send({ code: 'NOT_FOUND' });
+    if (!config.DASHBOARD_ENABLED) return reply.code(404).send({ code: 'NOT_FOUND' });
     return reply.type('application/javascript; charset=utf-8').send(dashboardScript);
   });
   app.get('/v1/payments', async () => service.listRecent(100));

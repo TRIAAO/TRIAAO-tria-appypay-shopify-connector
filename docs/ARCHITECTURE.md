@@ -18,3 +18,7 @@ The connector is split into four boundaries: Shopify Payment Extension, connecto
 - Refund, void and reconciliation contracts.
 
 No theme script or checkout bypass is part of this architecture.
+
+## UAT network boundary
+
+`docker-compose.uat.yml` keeps PostgreSQL private on the Docker network and binds the API only to `127.0.0.1:3100`. Public HTTPS traffic must enter through NGINX.
