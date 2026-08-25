@@ -27,6 +27,9 @@ model Merchant {
   active      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  shopifyTokenEncrypted String?
+  shopifyScopes         String?
+  installedAt           DateTime?
   payments    Payment[]
 }
 
