@@ -8,7 +8,12 @@ const schema = z.object({
   APP_BASE_URL: z.string().url(),
   APPYPAY_MODE: z.enum(['mock', 'sandbox', 'production']).default('mock'),
   APPYPAY_BASE_URL: z.string().url().optional().or(z.literal('')),
-  APPYPAY_API_KEY: z.string().optional(),
+  APPYPAY_TOKEN_URL: z.string().url().optional().or(z.literal('')),
+  APPYPAY_CLIENT_ID: z.string().optional(),
+  APPYPAY_CLIENT_SECRET: z.string().optional(),
+  APPYPAY_RESOURCE: z.string().optional(),
+  APPYPAY_PAYMENT_METHOD_GPO: z.string().optional(),
+  APPYPAY_PAYMENT_METHOD_REF: z.string().optional(),
   APPYPAY_WEBHOOK_SECRET: z.string().min(32),
   SHOPIFY_API_KEY: z.string().optional(),
   SHOPIFY_API_SECRET: z.string().optional(),
@@ -19,6 +24,10 @@ const schema = z.object({
 }).superRefine((value, ctx) => {
   if (value.SHOPIFY_AUTH_ENABLED && (!value.SHOPIFY_API_KEY || !value.SHOPIFY_API_SECRET || !value.APP_ENCRYPTION_KEY)) ctx.addIssue({ code: 'custom', message: 'Shopify auth requires API key, API secret and encryption key' });
   if (value.SHOPIFY_AUTH_ENABLED && Buffer.from(value.APP_ENCRYPTION_KEY ?? '', 'base64').length !== 32) ctx.addIssue({ code: 'custom', message: 'APP_ENCRYPTION_KEY must be a base64-encoded 32-byte key' });
+  if (value.APPYPAY_MODE !== 'mock') {
+    const required = ['APPYPAY_BASE_URL','APPYPAY_TOKEN_URL','APPYPAY_CLIENT_ID','APPYPAY_CLIENT_SECRET','APPYPAY_RESOURCE','APPYPAY_PAYMENT_METHOD_GPO','APPYPAY_PAYMENT_METHOD_REF'] as const;
+    for (const key of required) if (!value[key]) ctx.addIssue({ code:'custom', message:`${key} is required when APPYPAY_MODE is not mock` });
+  }
 });
 
 export type Config = z.infer<typeof schema>;
