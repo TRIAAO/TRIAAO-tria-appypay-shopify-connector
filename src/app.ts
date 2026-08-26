@@ -38,6 +38,7 @@ export function buildApp(config: Config, service: PaymentService, oauth?: Shopif
     if (!config.DASHBOARD_ENABLED) return reply.code(404).send({ code: 'NOT_FOUND' });
     return reply.type('application/javascript; charset=utf-8').send(dashboardScript);
   });
+  app.get('/v1/shopify/installations', async () => oauth ? oauth.listInstallations() : []);
   app.get('/v1/payments', async () => service.listRecent(100));
   app.post('/v1/payments', async (request, reply) => {
     const parsed = createPaymentSchema.safeParse(request.body);
