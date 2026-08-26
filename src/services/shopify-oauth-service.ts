@@ -16,4 +16,10 @@ export class ShopifyOauthService {
     const token = await response.json() as TokenResponse;
     await this.prisma.merchant.upsert({ where:{shopDomain:shop}, update:{active:true,shopifyTokenEncrypted:encryptSecret(token.access_token,this.config.APP_ENCRYPTION_KEY!),shopifyScopes:token.scope,installedAt:new Date()}, create:{shopDomain:shop,active:true,shopifyTokenEncrypted:encryptSecret(token.access_token,this.config.APP_ENCRYPTION_KEY!),shopifyScopes:token.scope,installedAt:new Date()} });
   }
+  async listInstallations() {
+    return this.prisma.merchant.findMany({
+      select: { shopDomain:true, active:true, shopifyScopes:true, installedAt:true },
+      orderBy: { installedAt:'desc' }
+    });
+  }
 }
